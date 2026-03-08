@@ -1,0 +1,20 @@
+{
+  "name": "@game-master/server",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --experimental-strip-types src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.37.0",
+    "@game-master/games": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.7.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
