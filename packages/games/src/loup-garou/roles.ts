@@ -4,7 +4,7 @@ export interface Role {
   team: 'village' | 'loups' | 'neutre'
   description: string
   nightAction: boolean
-  instructions: string // instruction pour la nuit (lue par le MJ à ce rôle uniquement)
+  instructions: string
 }
 
 export const ROLES: Role[] = [
@@ -29,7 +29,7 @@ export const ROLES: Role[] = [
     id: 'voyante',
     name: 'Voyante',
     team: 'village',
-    description: 'Chaque nuit, la Voyante peut découvrir la vraie identité d'un joueur.',
+    description: "Chaque nuit, la Voyante peut découvrir la vraie identité d'un joueur.",
     nightAction: true,
     instructions:
       'La Voyante désigne silencieusement un joueur. Le MJ lui montre discrètement sa carte.',
@@ -47,7 +47,7 @@ export const ROLES: Role[] = [
     id: 'chasseur',
     name: 'Chasseur',
     team: 'village',
-    description: 'Quand le Chasseur est éliminé, il peut emporter quelqu'un avec lui.',
+    description: "Quand le Chasseur est éliminé, il peut emporter quelqu'un avec lui.",
     nightAction: false,
     instructions: '',
   },
@@ -58,7 +58,7 @@ export const ROLES: Role[] = [
     description: 'La première nuit, Cupidon désigne deux amoureux liés par le destin.',
     nightAction: true,
     instructions:
-      'Cupidon désigne silencieusement deux joueurs qui deviennent amoureux. Si l'un meurt, l'autre meurt de chagrin.',
+      "Cupidon désigne silencieusement deux joueurs qui deviennent amoureux. Si l'un meurt, l'autre meurt de chagrin.",
   },
 ]
 
