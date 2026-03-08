@@ -52,6 +52,8 @@ export function PlayPage() {
   const [textInput, setTextInput] = useState('')
   const [micState, setMicState] = useState<'idle' | 'listening' | 'processing'>('idle')
   const [isTTSOn, setIsTTSOn] = useState(true)
+  const [interimTranscript, setInterimTranscript] = useState('')
+  const [micError, setMicError] = useState('')
 
   const sttSessionRef = useRef<{ stop(): void } | null>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -142,19 +144,30 @@ export function PlayPage() {
     stopTTS()
     let interim = ''
     setMicState('listening')
+    setMicError('')
+    setInterimTranscript('')
 
     sttSessionRef.current = startListening(
       (transcript, isFinal) => {
         interim = transcript
+        setInterimTranscript(transcript)
         if (isFinal) {
           sttSessionRef.current?.stop()
         }
       },
       (error) => {
-        console.warn('STT error:', error)
+        const errorMessages: Record<string, string> = {
+          'not-allowed': 'Accès au micro refusé. Autorisez le micro dans votre navigateur.',
+          'no-speech': 'Aucune parole détectée.',
+          'network': 'Erreur réseau pour la reconnaissance vocale.',
+          'speech_recognition_unavailable': 'Reconnaissance vocale non disponible dans ce navigateur.',
+        }
+        setMicError(errorMessages[error] ?? `Erreur micro : ${error}`)
         setMicState('idle')
+        setInterimTranscript('')
       },
       () => {
+        setInterimTranscript('')
         setMicState('processing')
         if (interim.trim()) {
           sendMessage(interim).then(() => setMicState('idle'))
@@ -238,7 +251,18 @@ export function PlayPage() {
       )}
 
       {/* Input area */}
-      <div className="border-t border-slate-800 px-4 py-3 flex items-end gap-3">
+      <div className="border-t border-slate-800 px-4 py-3 flex flex-col gap-2">
+        {micError && (
+          <div className="text-xs text-red-400 bg-red-950/40 border border-red-800/50 rounded-lg px-3 py-2">
+            {micError}
+          </div>
+        )}
+        {interimTranscript && micState === 'listening' && (
+          <div className="text-xs text-slate-400 italic px-1">
+            🎙️ <span className="text-slate-300">{interimTranscript}</span>
+          </div>
+        )}
+      <div className="flex items-end gap-3">
         {sttSupported() && (
           <MicButton
             state={micState}
@@ -278,6 +302,7 @@ export function PlayPage() {
         >
           🔊
         </button>
+      </div>
       </div>
     </div>
   )

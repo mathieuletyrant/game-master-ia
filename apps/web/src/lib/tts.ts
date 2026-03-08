@@ -3,7 +3,9 @@ let currentUtterance: SpeechSynthesisUtterance | null = null
 export function speak(text: string, onEnd?: () => void): void {
   if (!window.speechSynthesis) return
 
-  stop()
+  // Cancel any current speech
+  window.speechSynthesis.cancel()
+  currentUtterance = null
 
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.lang = 'fr-FR'
@@ -21,7 +23,14 @@ export function speak(text: string, onEnd?: () => void): void {
   if (onEnd) utterance.onend = onEnd
 
   currentUtterance = utterance
-  window.speechSynthesis.speak(utterance)
+
+  // Chrome bug: calling speak() immediately after cancel() silently fails.
+  // A small delay lets the browser process the cancel before starting a new utterance.
+  setTimeout(() => {
+    if (!window.speechSynthesis) return
+    if (window.speechSynthesis.paused) window.speechSynthesis.resume()
+    window.speechSynthesis.speak(utterance)
+  }, 100)
 }
 
 export function stop(): void {
