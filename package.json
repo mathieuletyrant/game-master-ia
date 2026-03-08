@@ -2,10 +2,10 @@
   "name": "game-master-ia",
   "private": true,
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
-    "type-check": "turbo type-check"
+    "dev": "turbo dev --filter=!//",
+    "build": "turbo build --filter=!//",
+    "lint": "turbo lint --filter=!//",
+    "type-check": "turbo type-check --filter=!//"
   },
   "devDependencies": {
     "turbo": "^2.3.3",
