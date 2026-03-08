@@ -1,5 +1,15 @@
 let currentUtterance: SpeechSynthesisUtterance | null = null
 
+// Strip markdown so TTS doesn't read asterisks, hashes, etc.
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/gs, '$1')
+    .replace(/\*(.+?)\*/gs, '$1')
+    .replace(/#{1,6}\s+/g, '')
+    .replace(/`(.+?)`/gs, '$1')
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+}
+
 export function speak(text: string, onEnd?: () => void): void {
   if (!window.speechSynthesis) return
 
@@ -7,7 +17,7 @@ export function speak(text: string, onEnd?: () => void): void {
   window.speechSynthesis.cancel()
   currentUtterance = null
 
-  const utterance = new SpeechSynthesisUtterance(text)
+  const utterance = new SpeechSynthesisUtterance(stripMarkdown(text))
   utterance.lang = 'fr-FR'
   utterance.rate = 0.9
   utterance.pitch = 0.85
@@ -31,6 +41,14 @@ export function speak(text: string, onEnd?: () => void): void {
     if (window.speechSynthesis.paused) window.speechSynthesis.resume()
     window.speechSynthesis.speak(utterance)
   }, 100)
+}
+
+// Must be called once from a user gesture to unlock TTS in Chrome.
+export function unlockTTS(): void {
+  if (!window.speechSynthesis) return
+  const u = new SpeechSynthesisUtterance('')
+  window.speechSynthesis.speak(u)
+  window.speechSynthesis.cancel()
 }
 
 export function stop(): void {

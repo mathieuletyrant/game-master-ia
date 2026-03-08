@@ -3,7 +3,7 @@ import { useParams, useSearch } from '@tanstack/react-router'
 import { GameMasterPanel } from '../../../components/GameMasterPanel'
 import { MicButton } from '../../../components/MicButton'
 import { streamAIResponse, type ChatMessage } from '../../../lib/api'
-import { speak, stop as stopTTS, isSupported as ttsSupported } from '../../../lib/tts'
+import { speak, stop as stopTTS, isSupported as ttsSupported, unlockTTS } from '../../../lib/tts'
 import { startListening, isSupported as sttSupported } from '../../../lib/stt'
 import { sessions, messages as messagesDb, generateId } from '../../../lib/db'
 import { createInitialState, advanceToNight, advanceToDay, eliminatePlayer } from '../../../lib/game-state'
@@ -57,6 +57,8 @@ export function PlayPage() {
 
   const sttSessionRef = useRef<{ stop(): void } | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const introSentRef = useRef(false)
+  const ttsUnlockedRef = useRef(false)
 
   const addAIMessage = useCallback((content: string) => {
     const id = generateId()
@@ -108,9 +110,28 @@ export function PlayPage() {
     }
   }, [gameId, sessionId, chatHistory, gameState, isStreaming, addAIMessage])
 
-  // Auto-start: greet the players on mount
+  // Unlock TTS on first user interaction (Chrome autoplay policy)
   useEffect(() => {
+    function onFirstInteraction() {
+      if (ttsUnlockedRef.current) return
+      ttsUnlockedRef.current = true
+      unlockTTS()
+      document.removeEventListener('click', onFirstInteraction)
+      document.removeEventListener('touchstart', onFirstInteraction)
+    }
+    document.addEventListener('click', onFirstInteraction)
+    document.addEventListener('touchstart', onFirstInteraction)
+    return () => {
+      document.removeEventListener('click', onFirstInteraction)
+      document.removeEventListener('touchstart', onFirstInteraction)
+    }
+  }, [])
+
+  // Auto-start: greet the players on mount (guard against React StrictMode double-fire)
+  useEffect(() => {
+    if (introSentRef.current) return
     if (displayMessages.length === 0 && players.length > 0) {
+      introSentRef.current = true
       const intro = `Votre serviteur. Cette nuit, ${players.length} âmes vont affronter les ténèbres dans le village de Thiercelieux. Les cartes sont distribuées — que chacun garde son rôle secret. Que la partie commence !`
       sendMessage(intro, gameState)
     }
