@@ -1,5 +1,3 @@
-import type { LoupGarouState } from '@game-master/games/loup-garou'
-
 const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? 'http://localhost:3001'
 
 export interface ChatMessage {
@@ -8,16 +6,17 @@ export interface ChatMessage {
 }
 
 export async function streamAIResponse(
-  messages: ChatMessage[],
-  gameState: LoupGarouState,
   gameId: string,
+  actionId: string,
+  messages: ChatMessage[],
   onChunk: (text: string) => void,
+  params?: Record<string, unknown>,
   signal?: AbortSignal,
 ): Promise<string> {
   const res = await fetch(`${SERVER_URL}/ai/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, gameState, gameId }),
+    body: JSON.stringify({ gameId, actionId, params, messages }),
     signal,
   })
 

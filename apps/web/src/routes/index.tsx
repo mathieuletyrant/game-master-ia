@@ -9,7 +9,7 @@ export function HomePage() {
           Choisissez votre jeu
         </h1>
         <p className="text-slate-400 text-lg">
-          Le Maître de Jeu IA s'occupe de tout — règles, narration, ambiance.
+          Votre assistant IA pour les jeux de société — règles, mise en place, questions.
         </p>
       </div>
 

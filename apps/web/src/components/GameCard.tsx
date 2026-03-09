@@ -8,7 +8,7 @@ interface Props {
 export function GameCard({ game }: Props) {
   return (
     <Link
-      to="/games/$gameId/setup"
+      to="/games/$gameId"
       params={{ gameId: game.id }}
       className="group block rounded-2xl border border-slate-700 bg-slate-900 hover:border-amber-500/60 hover:bg-slate-800 transition-all duration-200 p-6 cursor-pointer"
     >
@@ -32,7 +32,6 @@ export function GameCard({ game }: Props) {
             {tag}
           </span>
         ))}
-        <span className="ml-auto text-xs text-slate-500">{game.durationMinutes} min</span>
       </div>
     </Link>
   )

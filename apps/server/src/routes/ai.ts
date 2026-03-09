@@ -1,6 +1,5 @@
 import { Hono } from 'hono'
-import { buildSystemPrompt } from '@game-master/games/loup-garou'
-import type { LoupGarouState } from '@game-master/games/loup-garou'
+import { GAMES } from '@game-master/games'
 import { streamGameMaster } from '../lib/claude.js'
 import type { MessageParam } from '../lib/claude.js'
 import { isElevenLabsConfigured, synthesizeSpeech } from '../lib/tts.js'
@@ -8,20 +7,27 @@ import { isElevenLabsConfigured, synthesizeSpeech } from '../lib/tts.js'
 const ai = new Hono()
 
 interface ChatRequest {
-  messages: MessageParam[]
-  gameState: LoupGarouState
   gameId: string
+  actionId: string
+  params?: Record<string, unknown>
+  messages: MessageParam[]
 }
 
 ai.post('/chat', async (c) => {
   const body = await c.req.json<ChatRequest>()
-  const { messages, gameState, gameId } = body
+  const { gameId, actionId, params, messages } = body
 
-  if (gameId !== 'loup-garou') {
-    return c.json({ error: `Game "${gameId}" not supported yet.` }, 400)
+  const game = GAMES.find((g) => g.id === gameId)
+  if (!game) {
+    return c.json({ error: `Game "${gameId}" not found.` }, 400)
   }
 
-  const systemPrompt = buildSystemPrompt(gameState)
+  const action = game.actions.find((a) => a.id === actionId)
+  if (!action) {
+    return c.json({ error: `Action "${actionId}" not found for game "${gameId}".` }, 400)
+  }
+
+  const systemPrompt = action.buildPrompt(params)
 
   let textStream: ReadableStream<string>
   try {
