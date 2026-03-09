@@ -7,9 +7,8 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { RootLayout } from './components/RootLayout'
 import { HomePage } from './routes/index'
-import { SetupPage } from './routes/games/$gameId/setup'
-import { PlayPage } from './routes/games/$gameId/play'
-import { HistoryPage } from './routes/history'
+import { GameActionsPage } from './routes/games/$gameId/index'
+import { ActionPage } from './routes/games/$gameId/action/$actionId'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -28,32 +27,22 @@ const indexRoute = createRoute({
   component: HomePage,
 })
 
-const setupRoute = createRoute({
+const gameRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/games/$gameId/setup',
-  component: SetupPage,
+  path: '/games/$gameId',
+  component: GameActionsPage,
 })
 
-const playRoute = createRoute({
+const actionRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/games/$gameId/play',
-  validateSearch: (search: Record<string, unknown>) => ({
-    sessionId: typeof search.sessionId === 'string' ? search.sessionId : '',
-  }),
-  component: PlayPage,
-})
-
-const historyRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/history',
-  component: HistoryPage,
+  path: '/games/$gameId/action/$actionId',
+  component: ActionPage,
 })
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  setupRoute,
-  playRoute,
-  historyRoute,
+  gameRoute,
+  actionRoute,
 ])
 
 export const router = createRouter({ routeTree })

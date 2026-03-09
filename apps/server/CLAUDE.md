@@ -15,6 +15,7 @@ routes/
   ai.ts               # POST /ai/chat → stream Claude
 lib/
   claude.ts           # Wrapper Anthropic SDK (streamGameMaster)
+  tts.ts              # ElevenLabs TTS (optionnel)
 ```
 
 ## Variables d'environnement
@@ -22,6 +23,7 @@ lib/
 ANTHROPIC_API_KEY=sk-ant-...    # OBLIGATOIRE — clé Anthropic
 PORT=3001                        # Port du serveur (défaut: 3001)
 WEB_ORIGIN=http://localhost:5173 # Origine autorisée pour CORS
+ELEVENLABS_API_KEY=...           # Optionnel — TTS ElevenLabs
 ```
 
 ## Endpoints
@@ -29,22 +31,24 @@ WEB_ORIGIN=http://localhost:5173 # Origine autorisée pour CORS
 |---|---|---|
 | GET | /health | Health check |
 | POST | /ai/chat | Stream la réponse Claude (text/plain chunked) |
+| POST | /ai/tts | Synthèse vocale ElevenLabs (optionnel) |
 
 ## Format POST /ai/chat
 ```typescript
 // Body
 {
+  gameId: string                    // ex: 'loup-garou'
+  actionId: string                  // ex: 'setup', 'qa'
+  params?: Record<string, unknown>  // ex: { playerCount: 8 }
   messages: Array<{ role: 'user' | 'assistant', content: string }>
-  gameState: LoupGarouState  // état actuel du jeu
-  gameId: 'loup-garou'       // identifiant du jeu
 }
 
 // Response: text/plain, streamed chunk by chunk
 ```
 
-## Ajouter un jeu
-Dans `routes/ai.ts`, ajouter un `else if (gameId === 'mon-jeu')` et importer le `buildSystemPrompt` correspondant depuis `@game-master/games`.
+## Architecture
+Le serveur est **100% générique** — aucun code spécifique à un jeu. Il lookup le jeu + action dans `GAMES` (depuis `@game-master/games`), appelle `action.buildPrompt(params)` pour le system prompt, et stream via Claude.
 
 ## Modèle Claude
-- **claude-sonnet-4-6** — streaming activé, max_tokens 400
-- Le system prompt est reconstruit à chaque requête avec l'état courant du jeu
+- **claude-haiku-4-5** — streaming activé, max_tokens 1024
+- Le system prompt est construit par l'action du jeu à chaque requête

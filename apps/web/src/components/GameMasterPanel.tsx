@@ -10,17 +10,9 @@ interface Props {
   messages: Message[]
   streamingText: string
   isStreaming: boolean
-  phase: string
 }
 
-const phaseLabel: Record<string, string> = {
-  setup: '⚙️ Configuration',
-  night: '🌙 Nuit',
-  day: '☀️ Jour',
-  finished: '🏁 Fin de partie',
-}
-
-export function GameMasterPanel({ messages, streamingText, isStreaming, phase }: Props) {
+export function GameMasterPanel({ messages, streamingText, isStreaming }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -29,31 +21,14 @@ export function GameMasterPanel({ messages, streamingText, isStreaming, phase }:
 
   return (
     <div className="flex flex-col h-full">
-      {/* Phase badge */}
-      <div className="px-4 py-2 flex items-center gap-2">
-        <span className={[
-          'text-xs font-semibold px-3 py-1 rounded-full border',
-          phase === 'night'
-            ? 'bg-violet-900/40 border-violet-700/50 text-violet-300'
-            : phase === 'day'
-              ? 'bg-amber-900/30 border-amber-700/40 text-amber-300'
-              : 'bg-slate-800 border-slate-700 text-slate-400',
-        ].join(' ')}>
-          {phaseLabel[phase] ?? phase}
-        </span>
-      </div>
-
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={msg.role === 'ai' ? 'flex gap-3' : 'flex gap-3 flex-row-reverse'}
           >
-            <div className={[
-              'text-xl shrink-0 mt-1',
-              msg.role === 'ai' ? '' : '',
-            ].join(' ')}>
+            <div className="text-xl shrink-0 mt-1">
               {msg.role === 'ai' ? '🧙' : '💬'}
             </div>
             <div className={[
